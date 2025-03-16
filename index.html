@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Terms Search</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; }
+        .result { padding: 10px; border: 1px solid #ccc; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Scientific Terms Search</h1>
+    <input type="text" id="searchBox" placeholder="Search for a term..." onkeyup="searchTerms()">
+    <div id="results"></div>
+
+    <script>
+        let termsData = [];
+        let idx;
+
+        // Load JSON data from GitHub
+        fetch('https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/scientific-terms-database/main/terms.json')
+            .then(response => response.json())
+            .then(data => {
+                termsData = data;
+                idx = lunr(function () {
+                    this.ref('term');
+                    this.field('term');
+                    this.field('definition');
+                    this.field('field');
+
+                    data.forEach(doc => this.add(doc));
+                });
+            });
+
+        function searchTerms() {
+            let query = document.getElementById('searchBox').value;
+            let resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (query.length > 1) {
+                let results = idx.search(query);
+                results.forEach(result => {
+                    let termObj = termsData.find(t => t.term === result.ref);
+                    resultsDiv.innerHTML += `<div class="result"><strong>${termObj.term}</strong> (${termObj.field})<br>${termObj.definition}</div>`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
