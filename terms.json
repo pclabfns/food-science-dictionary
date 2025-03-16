@@ -1,0 +1,14 @@
+[
+    {
+        "term": "Photosynthesis",
+        "translation": {"fr": "Photosynthèse", "es": "Fotosíntesis"},
+        "definition": "The process by which green plants use sunlight to synthesize nutrients from carbon dioxide and water.",
+        "field": "Biology"
+    },
+    {
+        "term": "Entropy",
+        "translation": {"fr": "Entropie", "es": "Entropía"},
+        "definition": "A measure of the disorder or randomness in a system.",
+        "field": "Physics"
+    }
+]
