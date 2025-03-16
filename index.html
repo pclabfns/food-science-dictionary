@@ -21,7 +21,8 @@
         let idx;
 
         // Load JSON data from GitHub
-        fetch('https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/scientific-terms-database/main/terms.json')
+        fetch('https://pclabfns.github.io/food-science-dictionary/terms.json')
+
             .then(response => response.json())
             .then(data => {
                 termsData = data;
