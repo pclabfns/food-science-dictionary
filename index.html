@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scientific Terms Search</title>
     
-    <!-- Lunr.js and Greek Language Support -->
+    <!-- Load Lunr.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
+    
+    <!-- Load the required Lunr language plugins -->
     <script src="https://rawcdn.githack.com/MihaiValentin/lunr-languages/9275b5ac6ea86bc4c57159371d72d9e38ac6fc36/lunr.stemmer.support.js"></script>
+    <script src="https://rawcdn.githack.com/MihaiValentin/lunr-languages/9275b5ac6ea86bc4c57159371d72d9e38ac6fc36/lunr.multi.js"></script>
     <script src="https://rawcdn.githack.com/MihaiValentin/lunr-languages/9275b5ac6ea86bc4c57159371d72d9e38ac6fc36/lunr.gr.js"></script>
+
 
     <style>
         body { 
@@ -80,13 +84,13 @@
     
                 console.log("✅ JSON Loaded Successfully:", termsData);
     
-                // Ensure Greek language support is registered before indexing
-                lunr.gr();
+                // Register Greek language support
+                lunr.multi('en', 'gr');
     
                 idx = lunr(function () {
-                    this.use(lunr.gr); // Apply Greek language support
+                    this.use(lunr.multiLanguage('en', 'gr')); // Enable English & Greek support
     
-                    this.ref('term');  // Use `term` as the reference field instead of `id`
+                    this.ref('term');  // Use `term` as the reference field
                     this.field('term', { boost: 2 }); // Prioritize term name
                     this.field('definition'); // Index definitions
                     this.field('field'); // Index field of study
@@ -143,6 +147,7 @@
         // Load data when page loads
         loadData();
     </script>
+
 
 
 
