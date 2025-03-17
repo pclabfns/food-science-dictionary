@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scientific Terms Search</title>
-    
+
     <!-- Load Lunr.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
-    
-    <!-- Load the required Lunr language plugins -->
-    <script src="https://rawcdn.githack.com/MihaiValentin/lunr-languages/9275b5ac6ea86bc4c57159371d72d9e38ac6fc36/lunr.stemmer.support.js"></script>
-    <script src="https://rawcdn.githack.com/MihaiValentin/lunr-languages/9275b5ac6ea86bc4c57159371d72d9e38ac6fc36/lunr.multi.js"></script>
-    <script src="https://rawcdn.githack.com/MihaiValentin/lunr-languages/9275b5ac6ea86bc4c57159371d72d9e38ac6fc36/lunr.gr.js"></script>
 
+    <!-- Load the required Lunr language plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/lunr-languages/lunr.stemmer.support.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lunr-languages/lunr.gr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lunr-languages/lunr.multi.js"></script>
 
     <style>
         body { 
@@ -71,31 +70,36 @@
     <script>
         let termsData = [];
         let idx;
-    
+
         async function loadData() {
             try {
                 const response = await fetch('https://pclabfns.github.io/food-science-dictionary/terms.json');
                 termsData = await response.json();
-    
+
                 if (!termsData || termsData.length === 0) {
                     console.error("⚠️ JSON loaded but is empty!");
                     return;
                 }
-    
+
                 console.log("✅ JSON Loaded Successfully:", termsData);
-    
-                // Register Greek language support
-                lunr.multi('en', 'gr');
-    
+
+                // Ensure Greek language support is properly registered
+                lunr.gr = function () {
+                    this.pipeline.reset();
+                    this.pipeline.add(lunr.stemmer);
+                };
+
+                lunr.multiLanguage('en', 'gr');
+
                 idx = lunr(function () {
-                    this.use(lunr.multiLanguage('en', 'gr')); // Enable English & Greek support
-    
+                    this.use(lunr.multiLanguage('en', 'gr')); // Enable Greek & English search
+
                     this.ref('term');  // Use `term` as the reference field
                     this.field('term', { boost: 2 }); // Prioritize term name
                     this.field('definition'); // Index definitions
                     this.field('field'); // Index field of study
                     this.field('translation_en', { boost: 1.5 }); // Include English translation
-    
+
                     termsData.forEach((doc) => {
                         this.add({
                             term: doc.term.toLowerCase(),
@@ -105,30 +109,30 @@
                         });
                     });
                 });
-    
+
                 console.log("✅ Search Index Built Successfully:", idx);
-    
+
             } catch (error) {
                 console.error("❌ Error Loading JSON:", error);
             }
         }
-    
+
         function searchTerms() {
             if (!idx) {
                 console.warn("⚠️ Search index is not ready yet.");
                 return;
             }
-    
+
             let query = document.getElementById('searchBox').value.toLowerCase();
             let resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
-    
+
             if (query.length > 1) {
                 let results = idx.search(query);
                 
                 console.log("🔎 Search Query:", query);
                 console.log("🔎 Search Results:", results);
-    
+
                 if (results.length === 0) {
                     resultsDiv.innerHTML = "<p>No results found.</p>";
                 } else {
@@ -143,13 +147,10 @@
                 }
             }
         }
-    
+
         // Load data when page loads
         loadData();
     </script>
-
-
-
 
 </body>
 </html>
