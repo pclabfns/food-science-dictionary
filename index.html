@@ -89,10 +89,10 @@
                     this.pipeline.add(lunr.stemmer);
                 };
 
-                lunr.multiLanguage('en', 'gr');
+                lunr.multiLanguage('en', 'el');
 
                 idx = lunr(function () {
-                    this.use(lunr.multiLanguage('en', 'gr')); // Enable Greek & English search
+                    this.use(lunr.multiLanguage('en', 'el')); // Enable Greek & English search
 
                     this.ref('term');  // Use `term` as the reference field
                     this.field('term', { boost: 2 }); // Prioritize term name
