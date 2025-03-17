@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scientific Terms Search</title>
+    
+    <!-- Lunr.js and Greek Language Support -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
     <script src="https://rawcdn.githack.com/MihaiValentin/lunr-languages/9275b5ac6ea86bc4c57159371d72d9e38ac6fc36/lunr.stemmer.support.js"></script>
     <script src="https://rawcdn.githack.com/MihaiValentin/lunr-languages/9275b5ac6ea86bc4c57159371d72d9e38ac6fc36/lunr.gr.js"></script>
@@ -65,61 +67,67 @@
     <script>
         let termsData = [];
         let idx;
-    
+
         async function loadData() {
             try {
                 const response = await fetch('https://pclabfns.github.io/food-science-dictionary/terms.json');
                 termsData = await response.json();
-    
-                // Initialize Greek language support in Lunr.js
+
+                // Enable Greek language support
                 lunr.Pipeline.registerFunction(lunr.gr.stemmer, 'gr-stemmer');
-    
+
                 idx = lunr(function () {
-                    this.use(lunr.gr); // Apply Greek language support
-                    this.ref('id');
+                    this.use(lunr.gr); // Enable Greek indexing
+                    this.ref('id'); 
                     this.field('term', { boost: 2 }); // Prioritize term
                     this.field('definition');
                     this.field('field');
-                    this.field('translation_en', { boost: 1.5 }); // Include English translation
-    
+                    this.field('translation_en', { boost: 1.5 }); // Prioritize English translation
+
                     termsData.forEach((doc, index) => {
                         this.add({
                             id: index,
-                            term: doc.term.toLowerCase(), // Ensure case-insensitivity
+                            term: doc.term.toLowerCase(), 
                             definition: doc.definition.toLowerCase(),
                             field: doc.field.toLowerCase(),
                             translation_en: doc.translation.en ? doc.translation.en.toLowerCase() : ""
                         });
                     });
                 });
-    
+
+                console.log("Lunr index built successfully");
+
             } catch (error) {
                 console.error("Error loading JSON:", error);
             }
         }
-    
+
         async function searchTerms() {
             if (!idx) {
                 console.warn("Index is not ready yet.");
                 return;
             }
-    
+
             let query = document.getElementById('searchBox').value.toLowerCase();
             let resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
-    
+
             if (query.length > 1) {
                 let results = idx.search(query);
-                results.forEach(result => {
-                    let termObj = termsData[result.ref];
-                    resultsDiv.innerHTML += `<div class="result"><strong>${termObj.term}</strong> (${termObj.field})<br>${termObj.definition} <br> <i>Translation:</i> ${termObj.translation.en || "N/A"}</div>`;
-                });
+                if (results.length === 0) {
+                    resultsDiv.innerHTML = "<p>No results found.</p>";
+                } else {
+                    results.forEach(result => {
+                        let termObj = termsData[result.ref];
+                        resultsDiv.innerHTML += `<div class="result"><strong>${termObj.term}</strong> (${termObj.field})<br>${termObj.definition} <br> <i>Translation:</i> ${termObj.translation.en || "N/A"}</div>`;
+                    });
+                }
             }
         }
-    
+
+        // Load data when page loads
         loadData();
     </script>
-
 
 </body>
 </html>
