@@ -80,24 +80,20 @@
     
                 console.log("✅ JSON Loaded Successfully:", termsData);
     
-                // Debug: Ensure data is in the correct format
-                console.log("✅ First Term Object:", termsData[0]);
+                // Ensure Greek language support is registered before indexing
+                lunr.gr();
     
-                // Ensure Greek language support is registered
-                lunr.Pipeline.registerFunction(lunr.gr.stemmer, 'gr-stemmer');
-    
-                // Build Lunr.js search index
                 idx = lunr(function () {
-                    this.use(lunr.gr); // Enable Greek language support
-                    this.ref('id');  // Reference unique term index
+                    this.use(lunr.gr); // Apply Greek language support
+    
+                    this.ref('term');  // Use `term` as the reference field instead of `id`
                     this.field('term', { boost: 2 }); // Prioritize term name
                     this.field('definition'); // Index definitions
                     this.field('field'); // Index field of study
                     this.field('translation_en', { boost: 1.5 }); // Include English translation
     
-                    termsData.forEach((doc, index) => {
+                    termsData.forEach((doc) => {
                         this.add({
-                            id: index,
                             term: doc.term.toLowerCase(),
                             definition: doc.definition.toLowerCase(),
                             field: doc.field.toLowerCase(),
@@ -133,7 +129,7 @@
                     resultsDiv.innerHTML = "<p>No results found.</p>";
                 } else {
                     results.forEach(result => {
-                        let termObj = termsData[result.ref];
+                        let termObj = termsData.find(t => t.term.toLowerCase() === result.ref);
                         resultsDiv.innerHTML += `<div class="result">
                             <strong>${termObj.term}</strong> (${termObj.field})<br>
                             ${termObj.definition} <br> 
@@ -147,6 +143,7 @@
         // Load data when page loads
         loadData();
     </script>
+
 
 
 </body>
